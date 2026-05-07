@@ -10,6 +10,7 @@ import {
   MiniMap,
   useNodesState,
   useEdgesState,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { RoadmapNode } from './RoadmapNode';
@@ -68,7 +69,7 @@ export function RoadmapCanvas({
         panOnDrag={interactive}
         zoomOnScroll={interactive}
       >
-        <Background variant="dots" color="#e4e4e7" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} color="#e4e4e7" gap={12} size={1} />
         {showControls && interactive && (
           <Controls position="bottom-left" className="bg-white border border-zinc-200 rounded-lg" />
         )}

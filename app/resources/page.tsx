@@ -4,7 +4,20 @@ import { Sidebar } from '@/components/dashboard/Sidebar';
 import { BookOpen, ExternalLink, PlaySquare, Code, BookMarked, Video, Search, Download } from 'lucide-react';
 import Link from 'next/link';
 
-const resourcesData = [
+interface ResourceItem {
+  title: string;
+  author?: string;
+  duration?: string;
+  isFree: boolean;
+}
+
+interface ResourceSection {
+  category: string;
+  icon: React.ReactNode;
+  items: ResourceItem[];
+}
+
+const resourcesData: ResourceSection[] = [
   {
     category: 'Video Courses',
     icon: <Video className="w-4 h-4 text-blue-500" />,

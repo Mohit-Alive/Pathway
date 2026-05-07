@@ -6,7 +6,7 @@ import { CheckCircle2, Lock, PlayCircle, BookOpen, Clock } from 'lucide-react';
 
 interface CustomNodeProps {
   data: RoadmapNodeType['data'] & { onClick?: (e: React.MouseEvent) => void };
-  isConnecting: boolean;
+  isConnecting?: boolean;
 }
 
 export function RoadmapNode({ data, isConnecting }: CustomNodeProps) {

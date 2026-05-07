@@ -264,31 +264,31 @@ const nodeData = [
 
 const edges: RoadmapEdge[] = [
   // HTML -> CSS
-  { id: '1-2', source: '1', target: '2', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '1-2', source: '1', target: '2', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // HTML -> JS Basics
-  { id: '1-3', source: '1', target: '3', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '1-3', source: '1', target: '3', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // CSS -> JS Basics
-  { id: '2-3', source: '2', target: '3', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '2-3', source: '2', target: '3', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // JS Basics -> JS Advanced
-  { id: '3-4', source: '3', target: '4', animated: true, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '3-4', source: '3', target: '4', animated: true, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // JS Advanced -> React
-  { id: '4-5', source: '4', target: '5', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '4-5', source: '4', target: '5', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // React -> React Advanced
-  { id: '5-6', source: '5', target: '6', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '5-6', source: '5', target: '6', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // JS Advanced -> Node.js
-  { id: '4-7', source: '4', target: '7', animated: true, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '4-7', source: '4', target: '7', animated: true, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // Node.js -> REST APIs
-  { id: '7-8', source: '7', target: '8', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '7-8', source: '7', target: '8', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // REST APIs -> Databases
-  { id: '8-9', source: '8', target: '9', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '8-9', source: '8', target: '9', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // React Advanced -> Full Stack
-  { id: '6-11', source: '6', target: '11', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '6-11', source: '6', target: '11', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // Databases -> Full Stack
-  { id: '9-11', source: '9', target: '11', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '9-11', source: '9', target: '11', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // Auth -> Full Stack
-  { id: '10-11', source: '10', target: '11', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '10-11', source: '10', target: '11', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
   // REST APIs -> Auth
-  { id: '8-10', source: '8', target: '10', animated: false, stroke: '#a1a1aa', strokeWidth: 2 },
+  { id: '8-10', source: '8', target: '10', animated: false, style: { stroke: '#a1a1aa', strokeWidth: 2 } },
 ];
 
 export const mockRoadmapData = {
