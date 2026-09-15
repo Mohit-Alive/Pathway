@@ -10,6 +10,7 @@ import {
   BarChart3,
   Settings,
   GraduationCap,
+  Sparkles,
 } from 'lucide-react';
 
 const mainNav = [
@@ -18,6 +19,7 @@ const mainNav = [
   { label: 'Courses', href: '/courses', icon: GraduationCap },
   { label: 'Resources', href: '/resources', icon: BookOpen },
   { label: 'Progress', href: '/progress', icon: BarChart3 },
+  { label: 'Assistant', href: '/assistant', icon: Sparkles },
 ];
 
 export interface SidebarCollection {

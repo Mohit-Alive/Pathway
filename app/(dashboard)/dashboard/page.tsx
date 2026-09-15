@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { getDashboardMetrics } from "@/lib/dal/metrics";
 import {
@@ -214,7 +215,10 @@ export default async function DashboardPage() {
             </div>
 
             {/* AI Assistant card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-between">
+            <Link
+              href="/assistant"
+              className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-between transition-all hover:border-blue-200 hover:shadow-md"
+            >
               <div>
                 <h3 className="text-sm font-bold text-slate-800 mb-2">Pathway Assistant</h3>
                 <p className="text-xs text-slate-500 font-medium">Ask questions about your CS track curriculum and roadmap.</p>
@@ -223,18 +227,16 @@ export default async function DashboardPage() {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mic className="h-4 w-4 text-slate-400" />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Ask about curriculum..."
-                  className="block w-full pl-9 pr-10 py-2.5 border border-slate-200 rounded-xl text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
-                />
+                <div className="block w-full pl-9 pr-10 py-2.5 border border-slate-200 rounded-xl text-xs font-medium bg-slate-50 text-slate-400 group-hover:bg-white group-hover:border-blue-300 transition-all">
+                  Ask about curriculum...
+                </div>
                 <div className="absolute inset-y-0 right-1 flex items-center">
-                  <button className="h-7 w-7 rounded-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors shadow-sm">
+                  <div className="h-7 w-7 rounded-lg bg-blue-600 text-white flex items-center justify-center group-hover:bg-blue-700 transition-colors shadow-sm">
                     <ArrowUpRight className="h-4 w-4" />
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
