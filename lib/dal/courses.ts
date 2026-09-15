@@ -6,10 +6,9 @@ import {
   quizQuestions,
   userCourseProgress,
   quizAttempts,
-  type Course,
-  type Chapter,
 } from "@/lib/db/schema";
 import { eq, and, asc } from "drizzle-orm";
+import { withDbRetry } from "@/lib/db/retry";
 
 export interface PublicQuizQuestion {
   id: string;
@@ -35,17 +34,15 @@ export interface QuizEvaluationResult {
 export async function getCoursesList() {
   const user = await getOptionalUser();
 
-  const allCourses = await db
-    .select()
-    .from(courses)
-    .orderBy(asc(courses.position));
+  const allCourses = await withDbRetry(() =>
+    db.select().from(courses).orderBy(asc(courses.position))
+  );
 
-  let progressMap = new Map<string, string[]>();
+  const progressMap = new Map<string, string[]>();
   if (user) {
-    const userProgress = await db
-      .select()
-      .from(userCourseProgress)
-      .where(eq(userCourseProgress.userId, user.id));
+    const userProgress = await withDbRetry(() =>
+      db.select().from(userCourseProgress).where(eq(userCourseProgress.userId, user.id))
+    );
 
     for (const p of userProgress) {
       progressMap.set(p.courseId, p.completedChapters);
@@ -53,7 +50,9 @@ export async function getCoursesList() {
   }
 
   // Count total chapters per course
-  const allChapters = await db.select({ id: chapters.id, courseId: chapters.courseId }).from(chapters);
+  const allChapters = await withDbRetry(() =>
+    db.select({ id: chapters.id, courseId: chapters.courseId }).from(chapters)
+  );
   const chapterCounts = new Map<string, number>();
   for (const ch of allChapters) {
     chapterCounts.set(ch.courseId, (chapterCounts.get(ch.courseId) ?? 0) + 1);
@@ -76,40 +75,42 @@ export async function getCoursesList() {
 export async function getCourseDetail(courseId: string) {
   const user = await getOptionalUser();
 
-  const foundCourse = await db
-    .select()
-    .from(courses)
-    .where(eq(courses.id, courseId))
-    .limit(1);
+  const foundCourse = await withDbRetry(() =>
+    db.select().from(courses).where(eq(courses.id, courseId)).limit(1)
+  );
 
   if (foundCourse.length === 0) {
     return null;
   }
 
-  const courseChapters = await db
-    .select({
-      id: chapters.id,
-      courseId: chapters.courseId,
-      title: chapters.title,
-      position: chapters.position,
-      estimatedMinutes: chapters.estimatedMinutes,
-    })
-    .from(chapters)
-    .where(eq(chapters.courseId, courseId))
-    .orderBy(asc(chapters.position));
+  const courseChapters = await withDbRetry(() =>
+    db
+      .select({
+        id: chapters.id,
+        courseId: chapters.courseId,
+        title: chapters.title,
+        position: chapters.position,
+        estimatedMinutes: chapters.estimatedMinutes,
+      })
+      .from(chapters)
+      .where(eq(chapters.courseId, courseId))
+      .orderBy(asc(chapters.position))
+  );
 
   let completedChapters: string[] = [];
   if (user) {
-    const progress = await db
-      .select()
-      .from(userCourseProgress)
-      .where(
-        and(
-          eq(userCourseProgress.userId, user.id),
-          eq(userCourseProgress.courseId, courseId)
+    const progress = await withDbRetry(() =>
+      db
+        .select()
+        .from(userCourseProgress)
+        .where(
+          and(
+            eq(userCourseProgress.userId, user.id),
+            eq(userCourseProgress.courseId, courseId)
+          )
         )
-      )
-      .limit(1);
+        .limit(1)
+    );
 
     if (progress.length > 0) {
       completedChapters = progress[0].completedChapters;
@@ -124,28 +125,32 @@ export async function getCourseDetail(courseId: string) {
 }
 
 export async function getChapterContent(courseId: string, chapterId: string) {
-  const chapterRow = await db
-    .select()
-    .from(chapters)
-    .where(and(eq(chapters.id, chapterId), eq(chapters.courseId, courseId)))
-    .limit(1);
+  const chapterRow = await withDbRetry(() =>
+    db
+      .select()
+      .from(chapters)
+      .where(and(eq(chapters.id, chapterId), eq(chapters.courseId, courseId)))
+      .limit(1)
+  );
 
   if (chapterRow.length === 0) {
     return null;
   }
 
   // Explicit allowlist: fetch quiz questions WITHOUT correct_index or explanation
-  const questions: PublicQuizQuestion[] = await db
-    .select({
-      id: quizQuestions.id,
-      chapterId: quizQuestions.chapterId,
-      position: quizQuestions.position,
-      question: quizQuestions.question,
-      options: quizQuestions.options,
-    })
-    .from(quizQuestions)
-    .where(eq(quizQuestions.chapterId, chapterId))
-    .orderBy(asc(quizQuestions.position));
+  const questions: PublicQuizQuestion[] = await withDbRetry(() =>
+    db
+      .select({
+        id: quizQuestions.id,
+        chapterId: quizQuestions.chapterId,
+        position: quizQuestions.position,
+        question: quizQuestions.question,
+        options: quizQuestions.options,
+      })
+      .from(quizQuestions)
+      .where(eq(quizQuestions.chapterId, chapterId))
+      .orderBy(asc(quizQuestions.position))
+  );
 
   return {
     chapter: chapterRow[0],
@@ -159,19 +164,21 @@ export async function submitQuizAttempt(
 ): Promise<QuizEvaluationResult> {
   const user = await requireUser();
 
-  const fullQuestions = await db
-    .select({
-      id: quizQuestions.id,
-      chapterId: quizQuestions.chapterId,
-      position: quizQuestions.position,
-      question: quizQuestions.question,
-      options: quizQuestions.options,
-      correctIndex: quizQuestions.correctIndex,
-      explanation: quizQuestions.explanation,
-    })
-    .from(quizQuestions)
-    .where(eq(quizQuestions.chapterId, chapterId))
-    .orderBy(asc(quizQuestions.position));
+  const fullQuestions = await withDbRetry(() =>
+    db
+      .select({
+        id: quizQuestions.id,
+        chapterId: quizQuestions.chapterId,
+        position: quizQuestions.position,
+        question: quizQuestions.question,
+        options: quizQuestions.options,
+        correctIndex: quizQuestions.correctIndex,
+        explanation: quizQuestions.explanation,
+      })
+      .from(quizQuestions)
+      .where(eq(quizQuestions.chapterId, chapterId))
+      .orderBy(asc(quizQuestions.position))
+  );
 
   if (fullQuestions.length === 0) {
     throw new Error("No quiz questions found for this chapter.");

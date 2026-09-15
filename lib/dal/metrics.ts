@@ -12,6 +12,7 @@ import {
 import { eq, and, gte, desc, sql } from "drizzle-orm";
 import { getActiveRoadmap } from "./roadmap";
 import { format, subDays } from "date-fns";
+import { withDbRetry } from "@/lib/db/retry";
 
 export interface DashboardMetrics {
   userTrack: string;
@@ -65,11 +66,13 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
 
   // Fetch last 30 days of daily activity
   const thirtyDaysAgo = format(subDays(new Date(), 30), "yyyy-MM-dd");
-  const activityRows = await db
-    .select()
-    .from(dailyActivity)
-    .where(and(eq(dailyActivity.userId, user.id), gte(dailyActivity.date, thirtyDaysAgo)))
-    .orderBy(desc(dailyActivity.date));
+  const activityRows = await withDbRetry(() =>
+    db
+      .select()
+      .from(dailyActivity)
+      .where(and(eq(dailyActivity.userId, user.id), gte(dailyActivity.date, thirtyDaysAgo)))
+      .orderBy(desc(dailyActivity.date))
+  );
 
   let totalHoursLearned = 0;
   let streakDays = 0;
@@ -212,10 +215,12 @@ export const getProgressMetrics = cache(async (): Promise<ProgressMetrics> => {
   const roadmapData = await getActiveRoadmap();
 
   // Average Quiz Score
-  const quizAttemptsList = await db
-    .select({ score: quizAttempts.score, total: quizAttempts.totalQuestions })
-    .from(quizAttempts)
-    .where(eq(quizAttempts.userId, user.id));
+  const quizAttemptsList = await withDbRetry(() =>
+    db
+      .select({ score: quizAttempts.score, total: quizAttempts.totalQuestions })
+      .from(quizAttempts)
+      .where(eq(quizAttempts.userId, user.id))
+  );
 
   let averageQuizScore = "—";
   if (quizAttemptsList.length > 0) {
@@ -227,11 +232,13 @@ export const getProgressMetrics = cache(async (): Promise<ProgressMetrics> => {
   }
 
   // Daily activity records
-  const activityRows = await db
-    .select()
-    .from(dailyActivity)
-    .where(eq(dailyActivity.userId, user.id))
-    .orderBy(desc(dailyActivity.date));
+  const activityRows = await withDbRetry(() =>
+    db
+      .select()
+      .from(dailyActivity)
+      .where(eq(dailyActivity.userId, user.id))
+      .orderBy(desc(dailyActivity.date))
+  );
 
   let totalHoursSpent = 0;
   let activeDaysLast7 = 0;

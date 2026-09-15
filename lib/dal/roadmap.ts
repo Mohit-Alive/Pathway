@@ -10,6 +10,7 @@ import {
 } from "@/lib/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { computeNodeStatuses, type ComputedNodeStatus } from "@/lib/roadmap/status";
+import { withDbRetry } from "@/lib/db/retry";
 
 export interface RoadmapWithGraph {
   roadmap: Roadmap;
@@ -29,11 +30,13 @@ export interface RoadmapWithGraph {
 export async function getActiveRoadmap(): Promise<RoadmapWithGraph | null> {
   const user = await requireUser();
 
-  const userRoadmaps = await db
-    .select()
-    .from(roadmaps)
-    .where(and(eq(roadmaps.userId, user.id), eq(roadmaps.isActive, true)))
-    .limit(1);
+  const userRoadmaps = await withDbRetry(() =>
+    db
+      .select()
+      .from(roadmaps)
+      .where(and(eq(roadmaps.userId, user.id), eq(roadmaps.isActive, true)))
+      .limit(1)
+  );
 
   if (userRoadmaps.length === 0) {
     return null;
@@ -41,10 +44,9 @@ export async function getActiveRoadmap(): Promise<RoadmapWithGraph | null> {
 
   const roadmap = userRoadmaps[0];
 
-  const nodes = await db
-    .select()
-    .from(roadmapNodes)
-    .where(eq(roadmapNodes.roadmapId, roadmap.id));
+  const nodes = await withDbRetry(() =>
+    db.select().from(roadmapNodes).where(eq(roadmapNodes.roadmapId, roadmap.id))
+  );
 
   if (nodes.length === 0) {
     return {
@@ -65,15 +67,16 @@ export async function getActiveRoadmap(): Promise<RoadmapWithGraph | null> {
 
   const nodeIds = nodes.map((n) => n.id);
 
-  const prereqs = await db
-    .select()
-    .from(nodePrerequisites)
-    .where(eq(nodePrerequisites.roadmapId, roadmap.id));
+  const prereqs = await withDbRetry(() =>
+    db.select().from(nodePrerequisites).where(eq(nodePrerequisites.roadmapId, roadmap.id))
+  );
 
-  const progressList = await db
-    .select()
-    .from(nodeProgress)
-    .where(and(eq(nodeProgress.userId, user.id), inArray(nodeProgress.nodeId, nodeIds)));
+  const progressList = await withDbRetry(() =>
+    db
+      .select()
+      .from(nodeProgress)
+      .where(and(eq(nodeProgress.userId, user.id), inArray(nodeProgress.nodeId, nodeIds)))
+  );
 
   const computedStatuses = computeNodeStatuses(
     nodes.map((n) => ({ id: n.id, nodeId: n.nodeId })),
@@ -144,22 +147,24 @@ export async function updateNodeProgress(
   const user = await requireUser();
 
   // Verify node belongs to active roadmap of user
-  const targetNode = await db
-    .select({
-      id: roadmapNodes.id,
-      roadmapId: roadmapNodes.roadmapId,
-      estimatedHours: roadmapNodes.estimatedHours,
-    })
-    .from(roadmapNodes)
-    .innerJoin(roadmaps, eq(roadmapNodes.roadmapId, roadmaps.id))
-    .where(
-      and(
-        eq(roadmapNodes.id, nodeId),
-        eq(roadmaps.userId, user.id),
-        eq(roadmaps.isActive, true)
+  const targetNode = await withDbRetry(() =>
+    db
+      .select({
+        id: roadmapNodes.id,
+        roadmapId: roadmapNodes.roadmapId,
+        estimatedHours: roadmapNodes.estimatedHours,
+      })
+      .from(roadmapNodes)
+      .innerJoin(roadmaps, eq(roadmapNodes.roadmapId, roadmaps.id))
+      .where(
+        and(
+          eq(roadmapNodes.id, nodeId),
+          eq(roadmaps.userId, user.id),
+          eq(roadmaps.isActive, true)
+        )
       )
-    )
-    .limit(1);
+      .limit(1)
+  );
 
   if (targetNode.length === 0) {
     throw new Error("Node not found or not authorized.");

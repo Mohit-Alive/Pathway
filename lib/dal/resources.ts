@@ -6,6 +6,7 @@ import {
   type CuratedResource,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { withDbRetry } from "@/lib/db/retry";
 
 export interface ResourceWithSavedStatus extends CuratedResource {
   isSaved: boolean;
@@ -14,14 +15,16 @@ export interface ResourceWithSavedStatus extends CuratedResource {
 export async function getCuratedResourcesList(): Promise<ResourceWithSavedStatus[]> {
   const user = await getOptionalUser();
 
-  const allResources = await db.select().from(curatedResources);
+  const allResources = await withDbRetry(() => db.select().from(curatedResources));
 
-  let savedIds = new Set<string>();
+  const savedIds = new Set<string>();
   if (user) {
-    const userSaved = await db
-      .select({ resourceId: userSavedResources.resourceId })
-      .from(userSavedResources)
-      .where(eq(userSavedResources.userId, user.id));
+    const userSaved = await withDbRetry(() =>
+      db
+        .select({ resourceId: userSavedResources.resourceId })
+        .from(userSavedResources)
+        .where(eq(userSavedResources.userId, user.id))
+    );
 
     for (const s of userSaved) {
       savedIds.add(s.resourceId);
