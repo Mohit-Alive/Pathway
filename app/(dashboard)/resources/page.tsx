@@ -6,13 +6,14 @@ import {
   Code,
   Video,
   GraduationCap,
-  Map,
+  Map as MapIcon,
   Palette,
   Search,
   Bookmark,
   Star,
 } from "lucide-react";
 import ResourceCardClient from "@/components/resources/ResourceCardClient";
+import { ResourceWithSavedStatus } from "@/lib/dal/resources";
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   BookOpen: <BookOpen className="w-4 h-4 text-blue-500" />,
@@ -21,7 +22,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   GitBranch: <Code className="w-4 h-4 text-amber-500" />,
   GraduationCap: <GraduationCap className="w-4 h-4 text-emerald-500" />,
   Palette: <Palette className="w-4 h-4 text-pink-500" />,
-  Map: <Map className="w-4 h-4 text-indigo-500" />,
+  Map: <MapIcon className="w-4 h-4 text-indigo-500" />,
   Code: <Code className="w-4 h-4 text-blue-500" />,
 };
 
