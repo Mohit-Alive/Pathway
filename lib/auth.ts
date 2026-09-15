@@ -5,15 +5,22 @@ import { db } from "@/lib/db/client";
 import { users, type User } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
+export class UnauthorizedError extends Error {
+  constructor(message = "Unauthorized") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
 /**
  * Lazy get-or-create user in Neon Postgres based on active Clerk session.
- * Wrapped in React cache() so multiple DAL calls in one request trigger only one DB lookup.
+ * Throws UnauthorizedError if unauthenticated (safe for both RSC and API routes).
  */
 export const requireUser = cache(async (): Promise<User> => {
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    throw new UnauthorizedError("Authentication required.");
   }
 
   // Check if user exists in database
@@ -57,6 +64,18 @@ export const requireUser = cache(async (): Promise<User> => {
 
   return newUser;
 });
+
+/**
+ * Ensures user is authenticated for Server Components/Layouts.
+ * Redirects to /sign-in if unauthenticated.
+ */
+export async function requireUserOrRedirect(): Promise<User> {
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
+  return requireUser();
+}
 
 /**
  * Get current user if authenticated, without forcing redirect.

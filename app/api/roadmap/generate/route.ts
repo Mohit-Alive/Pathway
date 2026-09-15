@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth";
+import { requireUser, UnauthorizedError } from "@/lib/auth";
 import { generatePersonalizedRoadmap, QuestionnaireAnswers } from "@/lib/groq/generator";
 
 export const maxDuration = 60; // Set Vercel function timeout to 60s
@@ -30,6 +30,13 @@ export async function POST(req: Request) {
       message: "Roadmap generated successfully.",
     });
   } catch (error: any) {
+    if (error instanceof UnauthorizedError || error?.name === "UnauthorizedError") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     console.error("Roadmap generation API error:", error);
     return NextResponse.json(
       {

@@ -105,6 +105,12 @@ export default function OnboardingPage() {
 
       const data = await res.json();
 
+      if (res.status === 401 || data.error === 'Unauthorized') {
+        toast.error('Please sign in to generate your roadmap.');
+        router.push('/sign-in');
+        return;
+      }
+
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to generate roadmap.');
       }
