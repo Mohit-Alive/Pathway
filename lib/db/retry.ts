@@ -9,7 +9,9 @@
  * page load via the (dashboard)/onboarding layouts and is therefore the
  * highest-traffic, most visibly-impacted call site.
  */
-export async function withDbRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+const BACKOFF_MS = [400, 1200, 2500];
+
+export async function withDbRetry<T>(fn: () => Promise<T>, retries = BACKOFF_MS.length): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -18,7 +20,7 @@ export async function withDbRetry<T>(fn: () => Promise<T>, retries = 2): Promise
     } catch (error) {
       lastError = error;
       if (attempt < retries) {
-        await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+        await new Promise((resolve) => setTimeout(resolve, BACKOFF_MS[attempt] ?? 2500));
       }
     }
   }
