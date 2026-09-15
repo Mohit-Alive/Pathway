@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getChapterContent } from "@/lib/dal/courses";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeChapterHtml } from "@/lib/sanitize";
 
 export default async function ChapterPage({
   params,
@@ -18,7 +18,7 @@ export default async function ChapterPage({
   }
 
   const { chapter } = data;
-  const cleanHtml = DOMPurify.sanitize(chapter.content);
+  const cleanHtml = sanitizeChapterHtml(chapter.content);
 
   return (
     <>
