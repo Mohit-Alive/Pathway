@@ -286,7 +286,7 @@ export default function CoursesPage() {
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-3">Course Completed!</h2>
-              <p className="text-sm text-slate-500 font-medium mb-8">You have successfully finished all modules and quizzes for "{course.title}".</p>
+              <p className="text-sm text-slate-500 font-medium mb-8">You have successfully finished all modules and quizzes for &ldquo;{course.title}&rdquo;.</p>
               <button 
                 onClick={() => setView('list')}
                 className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-md transition-all"

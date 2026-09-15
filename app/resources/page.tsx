@@ -1,8 +1,7 @@
 'use client';
 
 import { Sidebar } from '@/components/dashboard/Sidebar';
-import { BookOpen, ExternalLink, PlaySquare, Code, BookMarked, Video, Search, Download } from 'lucide-react';
-import Link from 'next/link';
+import { BookOpen, ExternalLink, Code, BookMarked, Video, Search } from 'lucide-react';
 
 interface ResourceItem {
   title: string;

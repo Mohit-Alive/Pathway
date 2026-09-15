@@ -81,7 +81,7 @@ export default function OnboardingPage() {
             Build Your Learning Pathway
           </h1>
           <p className="text-base font-medium text-slate-500">
-            Let's personalize your learning journey in 4 simple steps
+            Let&apos;s personalize your learning journey in 4 simple steps
           </p>
         </div>
 

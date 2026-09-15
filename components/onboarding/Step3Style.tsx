@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { onboardingData } from '@/lib/mockData';
 
 interface Step3StyleProps {

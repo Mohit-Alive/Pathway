@@ -1,15 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "@xyflow/react/dist/style.css";
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "Inter", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --color-primary: #18181b;
-  --color-secondary: #f4f4f5;
   --color-accent: #3b82f6;
-  --color-border: #e4e4e7;
-  --color-background: #ffffff;
-  --color-muted: #71717a;
+  --color-canvas: #f3f4f6;
+
+  /* Container-query breakpoints for the content pane (see AppShell).
+     Calibrated so @pane-lg fires at the same viewport as today's `lg:`
+     once the 256px sidebar + padding is subtracted, at typical desktop
+     widths (1280px+). Below that band, columns intentionally reflow. */
+  --container-pane-sm: 30rem;
+  --container-pane-md: 45rem;
+  --container-pane-lg: 58rem;
 }
 
 @layer base {
@@ -27,31 +34,10 @@
 html,
 body {
   height: 100%;
-  font-family: "Inter", sans-serif;
   background-color: #ffffff;
   color: #18181b;
 }
 
-#__next {
-  height: 100%;
-}
-
 html {
   color-scheme: light;
-}
-
-@theme inline {
-  --color-zinc-50: #f9fafb;
-  --color-zinc-100: #f4f4f5;
-  --color-zinc-200: #e4e4e7;
-  --color-zinc-400: #a1a1aa;
-  --color-zinc-500: #71717a;
-  --color-zinc-900: #18181b;
-  --color-green-100: #dcfce7;
-  --color-green-500: #22c55e;
-  --color-green-800: #166534;
-  --color-blue-100: #dbeafe;
-  --color-blue-500: #3b82f6;
-  --color-blue-800: #1e40af;
-  --color-red-500: #ef4444;
 }
