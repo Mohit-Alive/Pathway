@@ -40,7 +40,7 @@ export default async function ChapterPage({
             {chapter.title}
           </h2>
           <div
-            className="prose prose-slate prose-lg max-w-none text-slate-600 font-medium leading-relaxed prose-pre:m-0 prose-pre:bg-transparent prose-pre:p-0"
+            className="prose prose-slate prose-lg max-w-none text-slate-600 font-medium leading-relaxed"
             dangerouslySetInnerHTML={{ __html: cleanHtml }}
           />
         </div>
