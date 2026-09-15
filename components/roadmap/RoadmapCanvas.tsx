@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import {
   ReactFlow,
   Node,
@@ -14,14 +14,15 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { RoadmapNode } from './RoadmapNode';
-import { mockRoadmapData } from '@/lib/mockData';
 
 interface RoadmapCanvasProps {
+  initialNodes?: Node[];
+  initialEdges?: Edge[];
   showMiniMap?: boolean;
   showControls?: boolean;
   interactive?: boolean;
   height?: string;
-  onNodeClick?: (nodeId: string) => void;
+  onNodeSelect?: (nodeId: string) => void;
 }
 
 const nodeTypes = {
@@ -29,62 +30,74 @@ const nodeTypes = {
 };
 
 export function RoadmapCanvas({
+  initialNodes = [],
+  initialEdges = [],
   showMiniMap = true,
   showControls = true,
   interactive = true,
-  height = 'h-[calc(100vh-64px)]',
-  onNodeClick,
+  height = 'h-full',
+  onNodeSelect,
 }: RoadmapCanvasProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(
-    mockRoadmapData.nodes
-  );
-  const [edges, setEdges, onEdgesChange] = useEdgesState(mockRoadmapData.edges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  const handleNodeClick = (event: React.MouseEvent, nodeId: string) => {
-    event.preventDefault();
-    if (onNodeClick && interactive) {
-      onNodeClick(nodeId);
+  useEffect(() => {
+    if (initialNodes.length > 0) {
+      setNodes(initialNodes);
+    }
+  }, [initialNodes, setNodes]);
+
+  useEffect(() => {
+    if (initialEdges.length > 0) {
+      setEdges(initialEdges);
+    }
+  }, [initialEdges, setEdges]);
+
+  const handleNodeClick = (_: React.MouseEvent, node: Node) => {
+    if (onNodeSelect && interactive) {
+      onNodeSelect(node.id);
     }
   };
 
   return (
-    <div className={`w-full ${height} bg-white rounded-xl border border-zinc-200`}>
+    <div className={`w-full ${height} bg-white rounded-xl border border-zinc-200 relative`}>
       <ReactFlow
         nodes={nodes.map((node) => ({
           ...node,
           type: 'roadmap',
-          data: {
-            ...node.data,
-            onClick: (e: React.MouseEvent) => handleNodeClick(e, node.id),
-          },
         }))}
         edges={edges.map((edge) => ({
           ...edge,
           type: 'smoothstep',
+          animated: edge.animated ?? false,
+          style: { strokeWidth: 2, stroke: '#cbd5e1' },
         }))}
         onNodesChange={interactive ? onNodesChange : undefined}
         onEdgesChange={interactive ? onEdgesChange : undefined}
+        onNodeClick={handleNodeClick}
         nodeTypes={nodeTypes}
         fitView
+        fitViewOptions={{ minZoom: 0.35, maxZoom: 1.2, padding: 0.2 }}
         panOnDrag={interactive}
         zoomOnScroll={interactive}
+        zoomOnPinch={interactive}
+        preventScrolling={interactive}
+        zoomOnDoubleClick={false}
       >
-        <Background variant={BackgroundVariant.Dots} color="#e4e4e7" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} color="#e2e8f0" gap={16} size={1} />
         {showControls && interactive && (
-          <Controls position="bottom-left" className="bg-white border border-zinc-200 rounded-lg" />
+          <Controls position="bottom-left" className="bg-white border border-zinc-200 rounded-lg shadow-sm" />
         )}
         {showMiniMap && interactive && (
           <MiniMap
             position="bottom-right"
-            className="bg-white border border-zinc-200 rounded-lg"
+            className="bg-white border border-zinc-200 rounded-lg shadow-sm"
             nodeColor={(node) => {
-              const dataNode = mockRoadmapData.nodes.find((n) => n.id === node.id);
-              if (!dataNode) return '#e4e4e7';
-              return dataNode.data.status === 'completed'
-                ? '#22c55e'
-                : dataNode.data.status === 'in-progress'
-                  ? '#3b82f6'
-                  : '#d4d4d8';
+              const status = node.data?.status;
+              if (status === 'completed') return '#10b981';
+              if (status === 'in_progress' || status === 'in-progress') return '#3b82f6';
+              if (status === 'available') return '#60a5fa';
+              return '#cbd5e1';
             }}
           />
         )}
