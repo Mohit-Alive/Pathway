@@ -29,7 +29,7 @@ export default async function ResourcesPage() {
   const resources = await getCuratedResourcesList();
 
   // Group resources by type
-  const typeGroups = new Map<string, typeof resources>();
+  const typeGroups = new Map<string, ResourceWithSavedStatus[]>();
   for (const r of resources) {
     const groupName =
       r.type === "doc"
