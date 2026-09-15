@@ -1,5 +1,11 @@
 'use client';
 
+// Export each chart as its own named export and import them individually
+// from Server Components (never `import DashboardCharts from ...` + dot
+// access). Next's client-reference transform only instruments direct
+// module exports; bundling these into a plain object and reading a
+// property off it server-side resolves to `undefined` at render time.
+
 import {
   BarChart,
   Bar,
@@ -101,10 +107,3 @@ export function ActivityLineChart({ data }: { data: WeeklyProgressPoint[] }) {
     </div>
   );
 }
-
-const DashboardCharts = {
-  WeeklyBarChart,
-  ActivityLineChart,
-};
-
-export default DashboardCharts;

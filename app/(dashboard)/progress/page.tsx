@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/shell/PageHeader";
 import { getProgressMetrics } from "@/lib/dal/metrics";
 import { Download } from "lucide-react";
-import ProgressCharts from "@/components/progress/ProgressCharts";
+import { AreaHoursChart, CategoryBarChart, CategoryPieChart } from "@/components/progress/ProgressCharts";
 
 export default async function ProgressPage() {
   const metrics = await getProgressMetrics();
@@ -86,7 +86,7 @@ export default async function ProgressPage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-bold text-slate-800">Study Hours Trend</h3>
               </div>
-              <ProgressCharts.AreaHoursChart data={metrics.weeklyBuckets} />
+              <AreaHoursChart data={metrics.weeklyBuckets} />
             </div>
 
             {/* Assessment Scores / Module Completion Bar Chart */}
@@ -94,7 +94,7 @@ export default async function ProgressPage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-bold text-slate-800">Category Progress</h3>
               </div>
-              <ProgressCharts.CategoryBarChart data={metrics.categoryBreakdown} />
+              <CategoryBarChart data={metrics.categoryBreakdown} />
             </div>
 
             {/* Time Allocation Pie Chart */}
@@ -102,7 +102,7 @@ export default async function ProgressPage() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-800">Category Allocation</h3>
               </div>
-              <ProgressCharts.CategoryPieChart data={metrics.categoryBreakdown} />
+              <CategoryPieChart data={metrics.categoryBreakdown} />
             </div>
           </div>
         </div>

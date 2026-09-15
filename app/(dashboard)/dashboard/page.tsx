@@ -9,7 +9,7 @@ import {
   Mic,
   ArrowUpRight,
 } from "lucide-react";
-import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import { WeeklyBarChart, ActivityLineChart } from "@/components/dashboard/DashboardCharts";
 
 export default async function DashboardPage() {
   const metrics = await getDashboardMetrics();
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
               <div className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
                 {metrics.totalHoursLearned} hrs
               </div>
-              <DashboardCharts.WeeklyBarChart data={metrics.weeklyProgress} />
+              <WeeklyBarChart data={metrics.weeklyProgress} />
             </div>
 
             {/* Curated Recommendations */}
@@ -210,7 +210,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <DashboardCharts.ActivityLineChart data={metrics.weeklyProgress} />
+              <ActivityLineChart data={metrics.weeklyProgress} />
             </div>
 
             {/* AI Assistant card */}
