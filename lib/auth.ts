@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
 import { users, type User } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { withDbRetry } from "@/lib/db/retry";
 
 export class UnauthorizedError extends Error {
   constructor(message = "Unauthorized") {
@@ -24,11 +25,9 @@ export const requireUser = cache(async (): Promise<User> => {
   }
 
   // Check if user exists in database
-  const existingUsers = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
+  const existingUsers = await withDbRetry(() =>
+    db.select().from(users).where(eq(users.id, userId)).limit(1)
+  );
 
   if (existingUsers.length > 0) {
     return existingUsers[0];
@@ -51,16 +50,18 @@ export const requireUser = cache(async (): Promise<User> => {
 
   const imageUrl = clerkUser?.imageUrl;
 
-  const [newUser] = await db
-    .insert(users)
-    .values({
-      id: userId,
-      email,
-      name,
-      imageUrl,
-      isOnboarded: false,
-    })
-    .returning();
+  const [newUser] = await withDbRetry(() =>
+    db
+      .insert(users)
+      .values({
+        id: userId,
+        email,
+        name,
+        imageUrl,
+        isOnboarded: false,
+      })
+      .returning()
+  );
 
   return newUser;
 });
@@ -87,11 +88,9 @@ export const getOptionalUser = cache(async (): Promise<User | null> => {
     return null;
   }
 
-  const existingUsers = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
+  const existingUsers = await withDbRetry(() =>
+    db.select().from(users).where(eq(users.id, userId)).limit(1)
+  );
 
   if (existingUsers.length > 0) {
     return existingUsers[0];
@@ -114,16 +113,18 @@ export const getOptionalUser = cache(async (): Promise<User | null> => {
 
   const imageUrl = clerkUser.imageUrl;
 
-  const [newUser] = await db
-    .insert(users)
-    .values({
-      id: userId,
-      email,
-      name,
-      imageUrl,
-      isOnboarded: false,
-    })
-    .returning();
+  const [newUser] = await withDbRetry(() =>
+    db
+      .insert(users)
+      .values({
+        id: userId,
+        email,
+        name,
+        imageUrl,
+        isOnboarded: false,
+      })
+      .returning()
+  );
 
   return newUser;
 });
