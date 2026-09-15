@@ -1,17 +1,35 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { RoadmapCanvas } from './RoadmapCanvas';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Clock, BookOpen, PlayCircle, Code2, CheckCircle2, ArrowRight, Download, Loader2 } from 'lucide-react';
+import { Clock, BookOpen, Code2, CheckCircle2, ArrowRight, Download, Loader2 } from 'lucide-react';
 import { RoadmapWithGraph } from '@/lib/dal/roadmap';
+import type { NodeStatus } from '@/lib/roadmap/status';
 import { toast } from 'sonner';
 
 export default function RoadmapPageClient({ initialData }: { initialData: RoadmapWithGraph | null }) {
+  const router = useRouter();
   const [data, setData] = useState(initialData);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Marking a node complete/incomplete can unlock or re-lock OTHER nodes
+  // downstream (computeNodeStatuses runs prerequisite checks over the
+  // whole graph) and changes the header's completed-node stats. The
+  // optimistic update in handleToggleStatus only flips the single toggled
+  // node so the click feels instant; router.refresh() re-runs the server
+  // component right after, and this render-phase sync (React's documented
+  // "adjust state when a prop changes" pattern, no effect flash) picks up
+  // the fresh initialData prop - correct statuses + stats for every node -
+  // once it arrives. https://react.dev/learn/you-might-not-need-an-effect
+  const [prevInitialData, setPrevInitialData] = useState(initialData);
+  if (initialData !== prevInitialData) {
+    setPrevInitialData(initialData);
+    setData(initialData);
+  }
 
   if (!data || data.nodes.length === 0) {
     return (
@@ -61,7 +79,7 @@ export default function RoadmapPageClient({ initialData }: { initialData: Roadma
 
   const handleToggleStatus = async (nodeId: string, currentStatus: string) => {
     setIsUpdating(true);
-    const nextStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
+    const nextStatus: NodeStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
     try {
       const res = await fetch('/api/roadmap/node/status', {
         method: 'POST',
@@ -86,7 +104,7 @@ export default function RoadmapPageClient({ initialData }: { initialData: Roadma
                 ...n,
                 computedStatus: {
                   ...n.computedStatus,
-                  status: nextStatus as any,
+                  status: nextStatus,
                 },
               };
             }
@@ -94,8 +112,12 @@ export default function RoadmapPageClient({ initialData }: { initialData: Roadma
           }),
         };
       });
-    } catch (err: any) {
-      toast.error(err.message || 'Error updating status');
+      // Reconcile with the server: this toggle may have unlocked or
+      // re-locked downstream nodes and changes the header's stats,
+      // neither of which the optimistic update above accounts for.
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error updating status');
     } finally {
       setIsUpdating(false);
     }
